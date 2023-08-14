@@ -1,0 +1,43 @@
+version: '3.10'
+
+networks:
+  mynetwork:
+    name: mynetwork
+    driver: bridge
+
+services:
+  api:
+    image: api_test
+    container_name: api
+    build:
+     context: .
+     dockerfile: docker/api/Dockerfile
+     args:
+       - PYTHON_VERSION=${PYTHON_VERSION}
+       - API_PORT=${API_PORT}
+    ports:
+      - ${API_PORT}:${API_PORT}
+    volumes:
+      - ../fastapi_postgreSQL:/app
+    networks:
+      - mynetwork
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+  db:
+    image: postgres:latest
+    container_name: my-postgres
+    environment:
+      POSTGRES_DB: ${db_database}
+      POSTGRES_USER: ${db_username}
+      POSTGRES_PASSWORD: ${db_password}
+    volumes:
+      - ./docker/postgresql:/var/lib/postgresql/data
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    networks:
+      - mynetwork
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
